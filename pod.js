@@ -116,7 +116,8 @@ export function podOver(engine, { wait = (ms) => new Promise((r) => setTimeout(r
         if (r.exitCode !== 0) throw new Error(r.stderr.trim() || `could not read ${path}`);
         const bytes = await engine.read_file('/.pod/out');
         try {
-          return { content: new TextDecoder('utf-8', { fatal: true }).decode(bytes), encoding: 'utf8' };
+          // Preserve a leading BOM when callers read and rewrite a file.
+          return { content: new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes), encoding: 'utf8' };
         } catch {
           let bin = '';
           for (const b of bytes) bin += String.fromCharCode(b);

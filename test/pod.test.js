@@ -108,6 +108,12 @@ describe('browser pod', () => {
     expect((await pod.run("cat \"site/it's here/index.html\"")).stdout).toContain('café');
   });
 
+  test('write then read preserves a leading UTF-8 BOM', async () => {
+    const content = '\uFEFFfirst line\n';
+    await pod.write('site/bom.txt', content);
+    expect(await pod.read('site/bom.txt')).toEqual({ content, encoding: 'utf8' });
+  });
+
   test('bytes that are not text come back as base64', async () => {
     await pod.write('pic.bin', new Uint8Array([0, 255, 254, 1]));
     expect(await pod.read('pic.bin')).toEqual({ content: Buffer.from([0, 255, 254, 1]).toString('base64'), encoding: 'base64' });
